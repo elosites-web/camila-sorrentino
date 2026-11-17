@@ -70,6 +70,14 @@ export function formatEnderecoLinha(config: EnderecoConfig): string | null {
   return `${ruaNumero} – ${[config.bairro, cidadeEstado].filter(Boolean).join(', ')}`;
 }
 
+export function formatEnderecoCompleto(config: EnderecoConfig): string {
+  const ruaNumero = [config.rua, config.numero].filter(Boolean).join(', ');
+  const cidadeEstado = [config.cidade, config.estado].filter(Boolean).join(' – ');
+  return [ruaNumero, [config.bairro, cidadeEstado].filter(Boolean).join(', ')]
+    .filter(Boolean)
+    .join(' – ');
+}
+
 export function buildMapsSearchUrl(config: EnderecoConfig): string | null {
   if (!config.confirmado || !config.mostrarEndereco) {
     return null;
@@ -84,4 +92,19 @@ export function buildMapsSearchUrl(config: EnderecoConfig): string | null {
   }
 
   return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
+}
+
+export function buildGoogleMapsDirectionsUrl(config: EnderecoConfig): string {
+  const endereco = formatEnderecoCompleto(config);
+  return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(endereco)}`;
+}
+
+export function buildWazeDirectionsUrl(config: EnderecoConfig): string {
+  const endereco = formatEnderecoCompleto(config);
+  return `https://waze.com/ul?q=${encodeURIComponent(endereco)}&navigate=yes`;
+}
+
+export function buildGoogleMapsEmbedUrl(config: EnderecoConfig): string {
+  const endereco = formatEnderecoCompleto(config);
+  return `https://www.google.com/maps?q=${encodeURIComponent(endereco)}&hl=pt-BR&z=16&output=embed`;
 }

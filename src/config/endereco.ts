@@ -9,11 +9,11 @@ export interface EnderecoConfig {
 }
 
 export const enderecoConfig: EnderecoConfig = {
-  rua: 'Rua Exemplo',
-  numero: '123',
-  bairro: 'Centro',
+  rua: 'Av. Ângelo Riveli',
+  numero: '542',
+  bairro: 'Jardim da Fonte',
   cidade: 'Jundiaí',
   estado: 'SP',
-  confirmado: false,
+  confirmado: true,
   mostrarEndereco: true,
 };

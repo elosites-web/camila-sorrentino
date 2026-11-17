@@ -65,6 +65,7 @@ export const siteConfig = {
     { label: 'Sobre', href: '#sobre' },
     { label: 'Formação', href: '#formacao' },
     { label: 'Dúvidas', href: '#duvidas' },
+    { label: 'Localização', href: '#localizacao' },
     { label: 'Contato', href: '#contato' },
   ],
   servicos: [

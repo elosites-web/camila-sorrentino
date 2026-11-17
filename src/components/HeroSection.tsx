@@ -1,14 +1,18 @@
 import { ArrowRight } from 'lucide-react';
 import { siteConfig } from '../config/site';
 import { buildWhatsAppUrl } from '../utils/formatting';
+import { FadeInSection } from './FadeInSection';
+import { OptimizedPicture } from './OptimizedPicture';
 import { ScrollReveal } from './ScrollReveal';
+import { WhatsAppIcon } from './SocialIcons';
 
 export function HeroSection() {
   const whatsappUrl = buildWhatsAppUrl();
 
   return (
-    <section
+    <FadeInSection
       id="inicio"
+      immediate
       className="relative overflow-hidden bg-[#FAF7F4] pb-14 pt-6 sm:pb-20 sm:pt-12 lg:pb-24 lg:pt-14"
     >
       <div className="mx-auto grid max-w-6xl items-center gap-8 px-4 sm:gap-10 sm:px-6 lg:grid-cols-12 lg:gap-14 lg:px-8">
@@ -49,8 +53,9 @@ export function HeroSection() {
               rel="noopener noreferrer"
               className="inline-flex min-h-[48px] items-center justify-center gap-2.5 whitespace-nowrap rounded-lg bg-[#8E5258] px-7 py-3.5 text-sm font-medium text-white transition-colors duration-200 hover:bg-[#754046]"
             >
+              <WhatsAppIcon className="h-4 w-4 shrink-0" />
               <span>Agendar pelo WhatsApp</span>
-              <ArrowRight className="h-4 w-4" aria-hidden="true" />
+              <ArrowRight className="h-4 w-4 shrink-0" aria-hidden="true" />
             </a>
 
             <a
@@ -64,18 +69,17 @@ export function HeroSection() {
 
         <ScrollReveal
           immediate
-          delay={0.12}
           className="order-1 lg:order-2 lg:col-span-6"
         >
           <div className="relative mx-auto max-w-[330px] sm:max-w-md lg:max-w-none">
             <div className="overflow-hidden rounded-t-[140px] rounded-b-2xl border border-[#DFD2C7] bg-[#EFE6DF] p-2 sm:rounded-t-[190px] sm:p-3">
               <div className="overflow-hidden rounded-t-[132px] rounded-b-xl sm:rounded-t-[178px]">
-                <img
+                <OptimizedPicture
                   src={siteConfig.imagens.hero}
                   alt={siteConfig.imagens.heroAlt}
-                  width={900}
-                  height={900}
+                  sizes="(min-width: 1024px) 532px, (min-width: 640px) 448px, 330px"
                   loading="eager"
+                  decoding="sync"
                   fetchPriority="high"
                   className="aspect-[5/4] w-full object-cover object-[center_35%] lg:aspect-square"
                 />
@@ -91,6 +95,6 @@ export function HeroSection() {
           </div>
         </ScrollReveal>
       </div>
-    </section>
+    </FadeInSection>
   );
 }

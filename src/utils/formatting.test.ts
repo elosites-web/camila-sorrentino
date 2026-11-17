@@ -1,13 +1,18 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
+  buildGoogleMapsDirectionsUrl,
+  buildGoogleMapsEmbedUrl,
   buildMapsSearchUrl,
   buildPriceListRows,
+  buildWazeDirectionsUrl,
   buildWhatsAppUrl,
+  formatEnderecoCompleto,
   formatEnderecoLinha,
   formatServicePrice,
 } from './formatting';
 import { buildLocalBusinessJsonLd } from './seo';
+import { enderecoConfig } from '../config/endereco';
 import { siteConfig } from '../config/site';
 import type { EnderecoConfig } from '../config/endereco';
 import type { PrecosConfig } from '../config/precos';
@@ -104,4 +109,26 @@ test('buildLocalBusinessJsonLd includes only confirmed data and omits unconfirme
   const confirmedSchema = buildLocalBusinessJsonLd({ ...provisional, confirmado: true });
   assert.equal(confirmedSchema.address?.addressLocality, 'Jundiaí');
   assert.equal(confirmedSchema.address?.addressRegion, 'SP');
+});
+
+test('official enderecoConfig formats complete address and builds Google Maps and Waze links', () => {
+  assert.equal(enderecoConfig.confirmado, true);
+  assert.equal(
+    formatEnderecoCompleto(enderecoConfig),
+    'Av. Ângelo Riveli, 542 – Jardim da Fonte, Jundiaí – SP',
+  );
+
+  const encoded = encodeURIComponent('Av. Ângelo Riveli, 542 – Jardim da Fonte, Jundiaí – SP');
+  assert.equal(
+    buildGoogleMapsDirectionsUrl(enderecoConfig),
+    `https://www.google.com/maps/dir/?api=1&destination=${encoded}`,
+  );
+  assert.equal(
+    buildWazeDirectionsUrl(enderecoConfig),
+    `https://waze.com/ul?q=${encoded}&navigate=yes`,
+  );
+  assert.equal(
+    buildGoogleMapsEmbedUrl(enderecoConfig),
+    `https://www.google.com/maps?q=${encoded}&hl=pt-BR&z=16&output=embed`,
+  );
 });

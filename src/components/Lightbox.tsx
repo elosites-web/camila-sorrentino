@@ -5,6 +5,7 @@ import {
   getNextLightboxIndex,
   getPrevLightboxIndex,
 } from '../utils/lightbox';
+import { OptimizedPicture } from './OptimizedPicture';
 
 export interface LightboxImage {
   id: string;
@@ -172,7 +173,7 @@ export function Lightbox({
       aria-modal="true"
       aria-label="Visualização ampliada da fotografia"
       tabIndex={-1}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-[#141110]/90 p-4 backdrop-blur-sm sm:p-6"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-[#141110]/94 p-4 sm:p-6"
       onClick={(event) => {
         if (event.target === event.currentTarget) {
           onClose();
@@ -208,10 +209,14 @@ export function Lightbox({
             </button>
           )}
 
-          <img
+          <OptimizedPicture
             key={currentItem.id}
             src={currentItem.imagem}
             alt={currentItem.alt}
+            mode="lightbox"
+            sizes="(min-width: 768px) 720px, 92vw"
+            loading="eager"
+            decoding="async"
             className="max-h-[68vh] w-auto max-w-full rounded-lg object-contain"
           />
 

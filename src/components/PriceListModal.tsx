@@ -1,10 +1,11 @@
-import { ArrowUpRight, MessageCircle, X } from 'lucide-react';
-import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
-import { useEffect, useRef } from 'react';
+import { ArrowUpRight, X } from 'lucide-react';
+import { AnimatePresence, m, useReducedMotion } from 'motion/react';
+import { useEffect, useMemo, useRef } from 'react';
 import { precosConfig } from '../config/precos';
 import { siteConfig } from '../config/site';
 import { buildPriceListRows, buildWhatsAppUrl } from '../utils/formatting';
 import { EDITORIAL_EASE } from '../utils/motion';
+import { WhatsAppIcon } from './SocialIcons';
 
 interface PriceListModalProps {
   isOpen: boolean;
@@ -24,7 +25,10 @@ export function PriceListModal({ isOpen, onClose, openerRef }: PriceListModalPro
   const onCloseRef = useRef(onClose);
   onCloseRef.current = onClose;
 
-  const rows = buildPriceListRows(siteConfig.servicos, precosConfig);
+  const rows = useMemo(
+    () => buildPriceListRows(siteConfig.servicos, precosConfig),
+    [],
+  );
   const hasAnyVisiblePrice = rows.some((row) => row.disponivel);
   const whatsappUrl = buildWhatsAppUrl();
 
@@ -102,7 +106,7 @@ export function PriceListModal({ isOpen, onClose, openerRef }: PriceListModalPro
   return (
     <AnimatePresence>
       {isOpen && (
-        <motion.div
+        <m.div
           ref={dialogRef}
           role="dialog"
           aria-modal="true"
@@ -116,14 +120,14 @@ export function PriceListModal({ isOpen, onClose, openerRef }: PriceListModalPro
               ? { duration: 0 }
               : { duration: 0.2, ease: EDITORIAL_EASE }
           }
-          className="fixed inset-0 z-50 flex items-center justify-center bg-[#1C1917]/70 p-4 backdrop-blur-sm sm:p-6"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-[#1C1917]/75 p-4 sm:p-6"
           onClick={(event) => {
             if (event.target === event.currentTarget) {
               onClose();
             }
           }}
         >
-          <motion.div
+          <m.div
             initial={
               prefersReducedMotion
                 ? { opacity: 1, y: 0, scale: 1 }
@@ -235,13 +239,13 @@ export function PriceListModal({ isOpen, onClose, openerRef }: PriceListModalPro
                 rel="noopener noreferrer"
                 className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-lg bg-[#8E5258] px-5 py-2.5 text-sm font-medium text-white transition-colors duration-200 hover:bg-[#754046]"
               >
-                <MessageCircle className="h-4 w-4 shrink-0" aria-hidden="true" />
-                <span>Consultar pelo WhatsApp</span>
+                <WhatsAppIcon className="h-4 w-4 shrink-0" />
+                <span>Consultar valores pelo WhatsApp</span>
                 <ArrowUpRight className="h-4 w-4 shrink-0" aria-hidden="true" />
               </a>
             </div>
-          </motion.div>
-        </motion.div>
+          </m.div>
+        </m.div>
       )}
     </AnimatePresence>
   );

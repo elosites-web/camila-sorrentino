@@ -1,5 +1,4 @@
-import { MotionConfig } from 'motion/react';
-import { useEffect } from 'react';
+import { LazyMotion, MotionConfig, domAnimation } from 'motion/react';
 import { AboutSection } from './components/AboutSection';
 import { ContactSection } from './components/ContactSection';
 import { FaqSection } from './components/FaqSection';
@@ -7,29 +6,26 @@ import { Footer } from './components/Footer';
 import { GallerySection } from './components/GallerySection';
 import { Header } from './components/Header';
 import { HeroSection } from './components/HeroSection';
+import { LocationSection } from './components/LocationSection';
 import { ScrollProgress } from './components/ScrollProgress';
 import { SectionDivider } from './components/SectionDivider';
 import { ServicesSection } from './components/ServicesSection';
 import { TrainingSection } from './components/TrainingSection';
 import { WhatsAppFloat } from './components/WhatsAppFloat';
 import { enderecoConfig } from './config/endereco';
-import { observeCoreImagePerformance } from './utils/imagePerformance';
 import { buildLocalBusinessJsonLd } from './utils/seo';
 
 export default function App() {
   const jsonLd = buildLocalBusinessJsonLd(enderecoConfig);
 
-  useEffect(() => {
-    return observeCoreImagePerformance();
-  }, []);
-
   return (
     <MotionConfig reducedMotion="user">
-      <div className="min-h-screen overflow-x-clip bg-[#FAF7F4] text-[#1C1917]">
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-        />
+      <LazyMotion features={domAnimation} strict>
+        <div className="min-h-screen overflow-x-clip bg-[#FAF7F4] text-[#1C1917]">
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+          />
 
         <a
           href="#conteudo-principal"
@@ -52,12 +48,15 @@ export default function App() {
           <TrainingSection />
           <SectionDivider tone="light-to-warm" />
           <FaqSection />
+          <SectionDivider tone="warm-to-light" />
+          <LocationSection />
           <ContactSection />
         </main>
 
         <Footer />
         <WhatsAppFloat />
-      </div>
+        </div>
+      </LazyMotion>
     </MotionConfig>
   );
 }

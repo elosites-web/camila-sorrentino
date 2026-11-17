@@ -7,6 +7,7 @@ import {
   calculateScrollProgress,
   createCardInteractionVariants,
   createFadeSlideUpVariants,
+  createSectionFadeVariants,
   getStaggerDelay,
 } from './motion';
 
@@ -45,6 +46,27 @@ test('createFadeSlideUpVariants disables opacity hide, displacement, and duratio
     transition: {
       duration: 0,
       delay: 0,
+    },
+  });
+});
+
+test('createSectionFadeVariants animates opacity smoothly without transform and honors reducedMotion', () => {
+  const normal = createSectionFadeVariants({ reducedMotion: false, duration: 0.55 });
+  assert.deepEqual(normal.hidden, { opacity: 0 });
+  assert.deepEqual(normal.visible, {
+    opacity: 1,
+    transition: {
+      duration: 0.55,
+      ease: EDITORIAL_EASE,
+    },
+  });
+
+  const reduced = createSectionFadeVariants({ reducedMotion: true, duration: 0.55 });
+  assert.deepEqual(reduced.hidden, { opacity: 1 });
+  assert.deepEqual(reduced.visible, {
+    opacity: 1,
+    transition: {
+      duration: 0,
     },
   });
 });

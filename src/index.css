@@ -25,9 +25,34 @@
   }
 }
 
+@keyframes whatsapp-pulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.55;
+  }
+  58% {
+    transform: scale(1.25);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1.25);
+    opacity: 0;
+  }
+}
+
+.whatsapp-pulse-ring {
+  animation: whatsapp-pulse 3.4s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+  will-change: transform, opacity;
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
+  }
+
+  .whatsapp-pulse-ring {
+    animation: none !important;
+    opacity: 0 !important;
   }
 
   *,

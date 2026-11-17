@@ -1,11 +1,18 @@
+import { useRef } from 'react';
 import { siteConfig } from '../config/site';
+import { useNearViewport } from '../hooks/useNearViewport';
+import { FadeInSection } from './FadeInSection';
+import { OptimizedPicture } from './OptimizedPicture';
 import { ScrollReveal } from './ScrollReveal';
 
 export function AboutSection() {
+  const sectionRef = useRef<HTMLElement>(null);
+  const shouldLoadPhotos = useNearViewport(sectionRef, '700px 0px');
   const hasSpacePhotos = siteConfig.espaco.length > 0;
 
   return (
-    <section
+    <FadeInSection
+      ref={sectionRef}
       id="sobre"
       className="bg-[#F4EDE6] pb-20 pt-[2px] sm:pb-24 lg:py-24"
     >
@@ -14,17 +21,23 @@ export function AboutSection() {
           <ScrollReveal className="lg:col-span-6">
             <div className="-mx-2 grid grid-cols-12 items-stretch gap-3 sm:-mx-3 sm:gap-4 lg:mx-0 lg:gap-5">
               <div className={hasSpacePhotos ? 'col-span-8 flex' : 'col-span-12'}>
-                <div className="h-full w-full overflow-hidden rounded-t-full rounded-b-2xl border border-[#DFD2C7] bg-[#FAF7F4] p-2">
-                  <img
-                    src={siteConfig.imagens.camila}
-                    alt={siteConfig.imagens.camilaAlt}
-                    width={800}
-                    height={1000}
-                    loading="lazy"
-                    className={`${
-                      hasSpacePhotos ? 'h-full' : 'aspect-[4/5]'
-                    } w-full rounded-t-full rounded-b-xl object-cover object-top`}
-                  />
+                <div className="aspect-[4/5] h-full w-full overflow-hidden rounded-t-full rounded-b-2xl border border-[#DFD2C7] bg-[#FAF7F4] p-2">
+                  {shouldLoadPhotos ? (
+                    <OptimizedPicture
+                      src={siteConfig.imagens.camila}
+                      alt={siteConfig.imagens.camilaAlt}
+                      sizes="(min-width: 1024px) 365px, 60vw"
+                      width={800}
+                      height={1000}
+                      loading="lazy"
+                      className="h-full w-full rounded-t-full rounded-b-xl object-cover object-top"
+                    />
+                  ) : (
+                    <div
+                      aria-hidden="true"
+                      className="h-full w-full rounded-t-full rounded-b-xl bg-[#EFE6DF]"
+                    />
+                  )}
                 </div>
               </div>
 
@@ -35,14 +48,19 @@ export function AboutSection() {
                       key={foto.id}
                       className="overflow-hidden rounded-xl border border-[#DFD2C7] bg-[#FAF7F4] p-1.5"
                     >
-                      <img
-                        src={foto.imagem}
-                        alt={foto.alt}
-                        width={450}
-                        height={600}
-                        loading="lazy"
-                        className="aspect-[7/10] w-full rounded-lg object-cover lg:aspect-[3/4]"
-                      />
+                      <div className="aspect-[7/10] w-full overflow-hidden rounded-lg bg-[#EFE6DF] lg:aspect-[3/4]">
+                        {shouldLoadPhotos && (
+                          <OptimizedPicture
+                            src={foto.imagem}
+                            alt={foto.alt}
+                            sizes="(min-width: 1024px) 175px, 30vw"
+                            width={450}
+                            height={600}
+                            loading="lazy"
+                            className="h-full w-full rounded-lg object-cover"
+                          />
+                        )}
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -82,6 +100,6 @@ export function AboutSection() {
           </ScrollReveal>
         </div>
       </div>
-    </section>
+    </FadeInSection>
   );
 }

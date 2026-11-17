@@ -1,12 +1,18 @@
 import { ArrowUpRight, ListFilter } from 'lucide-react';
-import { motion, useReducedMotion } from 'motion/react';
-import { useRef, useState } from 'react';
+import { Suspense, lazy, useRef, useState } from 'react';
 import { precosConfig } from '../config/precos';
 import { siteConfig, type ServiceItem } from '../config/site';
 import { buildWhatsAppUrl, formatServicePrice } from '../utils/formatting';
-import { createCardInteractionVariants, getStaggerDelay } from '../utils/motion';
-import { PriceListModal } from './PriceListModal';
+import { getStaggerDelay } from '../utils/motion';
+import { FadeInSection } from './FadeInSection';
+import { OptimizedPicture } from './OptimizedPicture';
 import { ScrollReveal } from './ScrollReveal';
+import { WhatsAppIcon } from './SocialIcons';
+
+const loadPriceListModal = () => import('./PriceListModal');
+const PriceListModal = lazy(() =>
+  loadPriceListModal().then((module) => ({ default: module.PriceListModal })),
+);
 
 interface ServiceCardProps {
   servico: ServiceItem;
@@ -15,55 +21,32 @@ interface ServiceCardProps {
 }
 
 function ServiceCard({ servico, index, whatsappUrl }: ServiceCardProps) {
-  const prefersReducedMotion = Boolean(useReducedMotion());
-  const [isHovered, setIsHovered] = useState(false);
-  const [isFocused, setIsFocused] = useState(false);
-
   const precoExibicao = formatServicePrice(servico.id, precosConfig);
-  const cardVariants = createCardInteractionVariants(prefersReducedMotion);
-  const isInteracting = !prefersReducedMotion && (isHovered || isFocused);
 
   return (
     <ScrollReveal
       delay={getStaggerDelay(index, 0.08)}
       className="flex"
     >
-      <motion.article
-        initial="rest"
-        animate={isInteracting ? 'active' : 'rest'}
-        variants={cardVariants}
-        onHoverStart={() => {
-          if (!prefersReducedMotion) {
-            setIsHovered(true);
-          }
-        }}
-        onHoverEnd={() => setIsHovered(false)}
-        onFocus={() => {
-          if (!prefersReducedMotion) {
-            setIsFocused(true);
-          }
-        }}
-        onBlur={(event) => {
-          if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
-            setIsFocused(false);
-          }
-        }}
-        className="group flex w-full flex-col overflow-hidden rounded-2xl border border-[#E2D6CB] bg-[#FAF7F4]"
-      >
+      <article className="group flex w-full flex-col overflow-hidden rounded-2xl border border-[#E2D6CB] bg-[#FAF7F4] shadow-[0_1px_2px_0_rgba(28,25,23,0.04)] transition-[transform,translate,scale,box-shadow,border-color] duration-[380ms] ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-1.5 hover:scale-[1.02] hover:border-[#C4A276]/80 hover:shadow-[0_20px_38px_-14px_rgba(28,25,23,0.16),0_8px_18px_-6px_rgba(142,82,88,0.12)] focus-within:-translate-y-1.5 focus-within:scale-[1.02] focus-within:border-[#C4A276]/80 focus-within:shadow-[0_20px_38px_-14px_rgba(28,25,23,0.16),0_8px_18px_-6px_rgba(142,82,88,0.12)] motion-reduce:transition-none motion-reduce:hover:translate-y-0 motion-reduce:hover:scale-100 motion-reduce:focus-within:translate-y-0 motion-reduce:focus-within:scale-100">
         <div className="relative aspect-[4/5] w-full overflow-hidden bg-[#ECE1D8]">
           {servico.imagem ? (
-            <img
-              src={servico.imagem}
-              alt={servico.alt}
-              width={720}
-              height={900}
-              loading="lazy"
-              className={`h-full w-full object-cover ${
-                prefersReducedMotion
-                  ? ''
-                  : 'transition-transform duration-300 group-hover:scale-[1.03] group-focus-within:scale-[1.03]'
-              }`}
-            />
+            <>
+              <OptimizedPicture
+                src={servico.imagem}
+                alt={servico.alt}
+                sizes="(min-width: 1024px) 265px, (min-width: 640px) 45vw, 92vw"
+                width={720}
+                height={900}
+                loading="lazy"
+                pictureClassName="block h-full w-full"
+                className="h-full w-full object-cover transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.06] group-focus-within:scale-[1.06] motion-reduce:transition-none motion-reduce:group-hover:scale-100 motion-reduce:group-focus-within:scale-100"
+              />
+              <span
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#1C1917]/15 via-transparent to-transparent opacity-0 transition-opacity duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:opacity-100 group-focus-within:opacity-100 motion-reduce:transition-none"
+              />
+            </>
           ) : (
             <div
               aria-hidden="true"
@@ -103,25 +86,32 @@ function ServiceCard({ servico, index, whatsappUrl }: ServiceCardProps) {
               href={whatsappUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex min-h-[44px] w-full items-center justify-center gap-2 rounded-lg border border-[#8E5258]/35 bg-white px-4 py-2.5 text-center text-xs font-medium text-[#754046] transition-colors duration-200 hover:border-[#8E5258] hover:bg-[#8E5258] hover:text-white"
+              className="inline-flex min-h-[44px] w-full items-center justify-center gap-1.5 rounded-lg border border-[#8E5258]/35 bg-white px-3.5 py-2.5 text-center text-xs font-medium text-[#754046] transition-colors duration-200 hover:border-[#8E5258] hover:bg-[#8E5258] hover:text-white"
             >
+              <WhatsAppIcon className="h-3.5 w-3.5 shrink-0" />
               <span>Consultar valores pelo WhatsApp</span>
               <ArrowUpRight className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
             </a>
           </div>
         </div>
-      </motion.article>
+      </article>
     </ScrollReveal>
   );
 }
 
 export function ServicesSection() {
   const [priceModalOpen, setPriceModalOpen] = useState(false);
+  const [hasLoadedPriceModal, setHasLoadedPriceModal] = useState(false);
   const priceButtonRef = useRef<HTMLButtonElement>(null);
   const whatsappUrl = buildWhatsAppUrl();
 
+  const handleOpenPriceModal = () => {
+    setHasLoadedPriceModal(true);
+    setPriceModalOpen(true);
+  };
+
   return (
-    <section
+    <FadeInSection
       id="servicos"
       className="border-t border-[#E7DDD5] bg-[#F4EDE6] py-20 sm:py-24"
     >
@@ -145,7 +135,9 @@ export function ServicesSection() {
               <button
                 ref={priceButtonRef}
                 type="button"
-                onClick={() => setPriceModalOpen(true)}
+                onMouseEnter={() => void loadPriceListModal()}
+                onFocus={() => void loadPriceListModal()}
+                onClick={handleOpenPriceModal}
                 className="inline-flex min-h-[44px] shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-lg border border-[#8E5258]/35 bg-white px-5 py-2.5 text-sm font-medium text-[#754046] transition-colors duration-200 hover:border-[#8E5258] hover:bg-[#8E5258] hover:text-white"
               >
                 <ListFilter className="h-4 w-4 shrink-0" aria-hidden="true" />
@@ -167,11 +159,15 @@ export function ServicesSection() {
         </div>
       </div>
 
-      <PriceListModal
-        isOpen={priceModalOpen}
-        onClose={() => setPriceModalOpen(false)}
-        openerRef={priceButtonRef}
-      />
-    </section>
+      {hasLoadedPriceModal && (
+        <Suspense fallback={null}>
+          <PriceListModal
+            isOpen={priceModalOpen}
+            onClose={() => setPriceModalOpen(false)}
+            openerRef={priceButtonRef}
+          />
+        </Suspense>
+      )}
+    </FadeInSection>
   );
 }

@@ -1,5 +1,5 @@
 import { Menu, X } from 'lucide-react';
-import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
+import { AnimatePresence, m, useReducedMotion } from 'motion/react';
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { siteConfig } from '../config/site';
@@ -12,6 +12,8 @@ import {
   captureScrollLockSnapshot,
   restoreScrollLockStyles,
 } from '../utils/scrollLock';
+import { OptimizedPicture } from './OptimizedPicture';
+import { WhatsAppIcon } from './SocialIcons';
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -32,7 +34,8 @@ export function Header() {
   useEffect(() => {
     const handleScroll = () => {
       if (document.body.style.position !== 'fixed') {
-        setIsScrolled(window.scrollY > 12);
+        const nextScrolled = window.scrollY > 12;
+        setIsScrolled((prev) => (prev === nextScrolled ? prev : nextScrolled));
       }
     };
 
@@ -137,7 +140,7 @@ export function Header() {
       ? createPortal(
           <AnimatePresence>
             {mobileMenuOpen && (
-              <motion.div
+              <m.div
                 data-testid="mobile-menu-backdrop"
                 aria-hidden="true"
                 initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0 }}
@@ -146,10 +149,10 @@ export function Header() {
                 transition={
                   prefersReducedMotion
                     ? { duration: 0 }
-                    : { duration: 0.22, ease: EDITORIAL_EASE }
+                    : { duration: 0.2, ease: EDITORIAL_EASE }
                 }
                 onClick={handleCloseMenu}
-                className="fixed inset-0 z-[42] touch-none bg-[#161312]/92 backdrop-blur-sm md:hidden"
+                className="fixed inset-0 z-[42] touch-none bg-[#161312]/94 md:hidden"
               />
             )}
           </AnimatePresence>,
@@ -170,33 +173,19 @@ export function Header() {
         data-scrolled={isScrolled ? 'true' : 'false'}
         className={`${
           mobileMenuOpen ? 'fixed inset-x-0 top-0' : 'sticky top-0'
-        } z-[44] border-b transition-[background-image,border-color,box-shadow] duration-200 backdrop-saturate-150 ${
+        } z-[44] border-b transition-[border-color,box-shadow] duration-200 ${
           isScrolled || mobileMenuOpen
-            ? 'border-[#E5CFAF]/55 bg-[linear-gradient(116deg,rgba(130,72,78,0.82)_0%,rgba(142,82,88,0.80)_64%,rgba(166,116,108,0.78)_84%,rgba(204,172,129,0.75)_100%)] backdrop-blur-xl shadow-[inset_0_1px_0_rgba(255,248,240,0.40),inset_0_-1px_0_rgba(215,185,142,0.28),0_16px_38px_-16px_rgba(38,16,19,0.48)]'
-            : 'border-[#E5CFAF]/45 bg-[linear-gradient(116deg,rgba(142,82,88,0.76)_0%,rgba(142,82,88,0.74)_64%,rgba(163,111,106,0.72)_84%,rgba(204,172,129,0.68)_100%)] backdrop-blur-lg shadow-[inset_0_1px_0_rgba(255,248,240,0.36),inset_0_-1px_0_rgba(215,185,142,0.22),0_10px_28px_-16px_rgba(48,22,26,0.36)]'
+            ? 'border-[#E5CFAF]/55 bg-[linear-gradient(116deg,rgba(130,72,78,0.86)_0%,rgba(142,82,88,0.84)_64%,rgba(166,116,108,0.82)_84%,rgba(204,172,129,0.79)_100%)] backdrop-blur-md shadow-[inset_0_1px_0_rgba(255,248,240,0.40),inset_0_-1px_0_rgba(215,185,142,0.28),0_16px_38px_-16px_rgba(38,16,19,0.48)]'
+            : 'border-[#E5CFAF]/45 bg-[linear-gradient(116deg,rgba(142,82,88,0.80)_0%,rgba(142,82,88,0.78)_64%,rgba(163,111,106,0.76)_84%,rgba(204,172,129,0.72)_100%)] backdrop-blur-md shadow-[inset_0_1px_0_rgba(255,248,240,0.36),inset_0_-1px_0_rgba(215,185,142,0.22),0_10px_28px_-16px_rgba(48,22,26,0.36)]'
         }`}
       >
-        {/* Camadas decorativas de vidro jateado e detalhes gravados do ateliê */}
+        {/* Camadas decorativas leves de vidro jateado e detalhes gravados do ateliê */}
         <div
           aria-hidden="true"
           className="pointer-events-none absolute inset-0 overflow-hidden"
         >
-          {/* Textura microcristalina de vidro jateado */}
-          <svg
-            className="absolute inset-0 h-full w-full opacity-[0.18] mix-blend-soft-light"
-            preserveAspectRatio="none"
-          >
-            <filter id="camila-frosted-glass-grain">
-              <feTurbulence
-                type="fractalNoise"
-                baseFrequency="0.82"
-                numOctaves="3"
-                stitchTiles="stitch"
-              />
-              <feColorMatrix type="saturate" values="0" />
-            </filter>
-            <rect width="100%" height="100%" filter="url(#camila-frosted-glass-grain)" />
-          </svg>
+          {/* Textura microcristalina estática (zero custo de filtro SVG por frame) */}
+          <div className="absolute inset-0 bg-[radial-gradient(rgba(255,248,240,0.18)_0.55px,transparent_0.55px)] [background-size:3px_3px] opacity-60" />
 
           {/* Reflexo diagonal acetinado no vidro */}
           <div className="absolute inset-0 bg-[linear-gradient(104deg,rgba(255,255,255,0.16)_0%,transparent_26%,rgba(255,246,232,0.09)_52%,transparent_74%,rgba(232,208,169,0.16)_100%)]" />
@@ -254,14 +243,14 @@ export function Header() {
           </svg>
         </div>
 
-        <div className="relative z-10 mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4 sm:px-6 md:gap-4 lg:h-20 lg:gap-8 lg:px-8">
+        <div className="relative z-10 mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4 sm:px-6 md:gap-2.5 lg:h-20 lg:gap-8 lg:px-8">
           <a
             href="#inicio"
             onClick={(event) => handleInternalLinkClick(event, '#inicio')}
             className={`inline-flex shrink-0 items-center rounded-md py-1 focus-visible:outline-[#E8D0A9] focus-visible:outline-offset-4 max-md:absolute max-md:top-1/2 max-md:-translate-y-1/2 md:static md:translate-x-0 md:translate-y-0 ${
               prefersReducedMotion
                 ? ''
-                : 'max-md:transition-[left,translate,transform] max-md:duration-250 max-md:ease-[cubic-bezier(0.22,1,0.36,1)]'
+                : 'max-md:transition-[left,translate,transform] max-md:duration-200 max-md:ease-[cubic-bezier(0.22,1,0.36,1)]'
             } ${
               mobileMenuOpen
                 ? 'max-md:left-1/2 max-md:-translate-x-1/2'
@@ -269,25 +258,21 @@ export function Header() {
             }`}
             aria-label="Camila Sorrentino – Nail Designer, voltar ao início"
           >
-            <motion.img
+            <OptimizedPicture
               src={siteConfig.imagens.logoPreto}
               alt={siteConfig.marca}
+              sizes="(min-width: 1024px) 148px, 128px"
               width={148}
               height={52}
-              initial={prefersReducedMotion ? false : { opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={
-                prefersReducedMotion
-                  ? { duration: 0 }
-                  : { duration: 0.7, ease: EDITORIAL_EASE }
-              }
-              className="h-11 w-auto object-contain brightness-0 invert drop-shadow-[0_1px_6px_rgba(32,14,17,0.32)] lg:h-12"
+              loading="eager"
+              decoding="sync"
+              className="h-11 w-auto object-contain brightness-0 invert drop-shadow-[0_1px_6px_rgba(32,14,17,0.32)] md:h-10 lg:h-12"
             />
           </a>
 
           <nav
             aria-label="Navegação principal"
-            className="hidden items-center md:flex md:gap-4 lg:gap-7"
+            className="hidden items-center md:flex md:gap-2.5 lg:gap-6"
           >
             {siteConfig.navegacao.map((item) => {
               const itemId = normalizeAnchorId(item.href);
@@ -299,7 +284,7 @@ export function Header() {
                   href={item.href}
                   aria-current={isActive ? 'location' : undefined}
                   onClick={(event) => handleInternalLinkClick(event, item.href)}
-                  className={`shrink-0 whitespace-nowrap border-b-2 py-1 font-medium drop-shadow-[0_1px_2px_rgba(38,16,19,0.3)] transition-[color,border-color,text-shadow] duration-200 focus-visible:outline-[#E8D0A9] md:text-[13px] lg:text-sm ${
+                  className={`shrink-0 whitespace-nowrap border-b-2 py-1 font-medium drop-shadow-[0_1px_2px_rgba(38,16,19,0.3)] transition-[color,border-color,text-shadow] duration-200 focus-visible:outline-[#E8D0A9] md:text-[12.5px] lg:text-sm ${
                     isActive
                       ? 'border-[#E8D0A9] text-white [text-shadow:0_0_0.55px_currentColor,0_1px_2px_rgba(38,16,19,0.35)]'
                       : 'border-transparent text-white/90 hover:border-[#E8D0A9]/75 hover:text-white'
@@ -316,9 +301,10 @@ export function Header() {
               href={whatsappUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="hidden shrink-0 whitespace-nowrap rounded-lg border border-[#E8D0A9]/75 bg-[#FAF7F4]/95 font-medium text-[#6B373D] shadow-[0_6px_18px_-8px_rgba(32,14,17,0.38)] transition-[color,background-color,border-color,box-shadow] duration-200 hover:bg-[#F3E5D0] hover:text-[#55282D] focus-visible:border-[#8E5258] focus-visible:shadow-[0_0_18px_4px_rgba(142,82,88,0.55)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8E5258] focus-visible:ring-offset-2 focus-visible:ring-offset-[#FAF7F4] md:inline-flex md:px-3.5 md:py-2 md:text-xs lg:px-5 lg:py-2.5 lg:text-sm"
+              className="hidden shrink-0 items-center gap-1.5 whitespace-nowrap rounded-lg border border-[#E8D0A9]/75 bg-[#FAF7F4]/95 font-medium text-[#6B373D] shadow-[0_6px_18px_-8px_rgba(32,14,17,0.38)] transition-[color,background-color,border-color,box-shadow] duration-200 hover:bg-[#F3E5D0] hover:text-[#55282D] focus-visible:border-[#8E5258] focus-visible:shadow-[0_0_18px_4px_rgba(142,82,88,0.55)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8E5258] focus-visible:ring-offset-2 focus-visible:ring-offset-[#FAF7F4] md:inline-flex md:px-3 md:py-1.5 md:text-xs lg:gap-2 lg:px-5 lg:py-2.5 lg:text-sm"
             >
-              Agendar pelo WhatsApp
+              <WhatsAppIcon className="h-3.5 w-3.5 shrink-0 lg:h-4 lg:w-4" />
+              <span>Agendar pelo WhatsApp</span>
             </a>
 
             <button
@@ -341,7 +327,7 @@ export function Header() {
 
         <AnimatePresence initial={false}>
           {mobileMenuOpen && (
-            <motion.nav
+            <m.nav
               id="mobile-navigation"
               aria-label="Navegação móvel"
               initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0, y: -8 }}
@@ -350,9 +336,9 @@ export function Header() {
               transition={
                 prefersReducedMotion
                   ? { duration: 0 }
-                  : { duration: 0.2, ease: EDITORIAL_EASE }
+                  : { duration: 0.18, ease: EDITORIAL_EASE }
               }
-              className="absolute inset-x-0 top-full z-20 max-h-[calc(100vh-4.1rem)] supports-[height:100dvh]:max-h-[calc(100dvh-4.1rem)] overflow-y-auto overscroll-contain touch-pan-y border-t border-[#E8D0A9]/35 bg-[linear-gradient(180deg,rgba(116,62,68,0.96)_0%,rgba(142,82,88,0.95)_78%,rgba(173,132,106,0.94)_100%)] px-4 pb-6 pt-3 text-[#FAF7F4] shadow-[0_24px_48px_-16px_rgba(20,12,13,0.6)] backdrop-blur-xl md:hidden"
+              className="absolute inset-x-0 top-full z-20 max-h-[calc(100vh-4.1rem)] supports-[height:100dvh]:max-h-[calc(100dvh-4.1rem)] overflow-y-auto overscroll-contain touch-pan-y border-t border-[#E8D0A9]/35 bg-[linear-gradient(180deg,rgba(116,62,68,0.97)_0%,rgba(142,82,88,0.96)_78%,rgba(173,132,106,0.95)_100%)] px-4 pb-6 pt-3 text-[#FAF7F4] shadow-[0_24px_48px_-16px_rgba(20,12,13,0.6)] backdrop-blur-md md:hidden"
             >
               <ul className="flex flex-col gap-1">
                 {siteConfig.navegacao.map((item) => {
@@ -389,12 +375,13 @@ export function Header() {
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={handleCloseMenu}
-                  className="flex min-h-[44px] w-full items-center justify-center rounded-lg border border-[#E8D0A9]/75 bg-[#FAF7F4]/95 px-5 py-3 text-sm font-medium text-[#6B373D] transition-colors hover:bg-[#F3E5D0] hover:text-[#55282D] focus-visible:outline-[#FAF7F4]"
+                  className="flex min-h-[44px] w-full items-center justify-center gap-2 rounded-lg border border-[#E8D0A9]/75 bg-[#FAF7F4]/95 px-5 py-3 text-sm font-medium text-[#6B373D] transition-colors hover:bg-[#F3E5D0] hover:text-[#55282D] focus-visible:outline-[#FAF7F4]"
                 >
-                  Agendar pelo WhatsApp
+                  <WhatsAppIcon className="h-4 w-4 shrink-0" />
+                  <span>Agendar pelo WhatsApp</span>
                 </a>
               </div>
-            </motion.nav>
+            </m.nav>
           )}
         </AnimatePresence>
       </header>

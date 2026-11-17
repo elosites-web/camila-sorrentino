@@ -1,16 +1,28 @@
-import { useRef, useState } from 'react';
+import { Suspense, lazy, useRef, useState } from 'react';
 import { siteConfig } from '../config/site';
-import { Lightbox } from './Lightbox';
+import { useNearViewport } from '../hooks/useNearViewport';
+import { FadeInSection } from './FadeInSection';
+import { OptimizedPicture } from './OptimizedPicture';
 import { ScrollReveal } from './ScrollReveal';
+
+const Lightbox = lazy(() =>
+  import('./Lightbox').then((module) => ({ default: module.Lightbox })),
+);
 
 export function TrainingSection() {
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+  const sectionRef = useRef<HTMLElement>(null);
   const openerRef = useRef<HTMLElement | null>(null);
+  const shouldLoadPhoto = useNearViewport(sectionRef, '700px 0px');
 
   const hasIndividualCertificates = siteConfig.certificadosIndividuais.length > 0;
 
   return (
-    <section id="formacao" className="bg-[#FAF7F4] py-20 sm:py-24">
+    <FadeInSection
+      ref={sectionRef}
+      id="formacao"
+      className="bg-[#FAF7F4] py-20 sm:py-24"
+    >
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
         <div className="grid items-center gap-10 lg:grid-cols-12 lg:gap-14">
           <ScrollReveal className="lg:col-span-5">
@@ -43,7 +55,7 @@ export function TrainingSection() {
                     aria-label={`Ampliar certificado: ${cert.alt}`}
                     className="overflow-hidden rounded-xl border border-[#E2D6CB] bg-white p-2 transition-transform duration-200 hover:-translate-y-0.5"
                   >
-                    <img
+                    <OptimizedPicture
                       src={cert.imagem}
                       alt={cert.alt}
                       width={400}
@@ -56,29 +68,36 @@ export function TrainingSection() {
               </div>
             ) : (
               <div className="overflow-hidden rounded-2xl border border-[#DFD2C7] bg-white p-3">
-                <img
-                  src={siteConfig.imagens.formacaoParede}
-                  alt={siteConfig.imagens.formacaoParedeAlt}
-                  width={1000}
-                  height={900}
-                  loading="lazy"
-                  className="aspect-[10/9] w-full rounded-xl object-cover"
-                />
+                <div className="aspect-[10/9] w-full overflow-hidden rounded-xl bg-[#EFE6DF]">
+                  {shouldLoadPhoto && (
+                    <OptimizedPicture
+                      src={siteConfig.imagens.formacaoParede}
+                      alt={siteConfig.imagens.formacaoParedeAlt}
+                      sizes="(min-width: 1024px) 615px, 92vw"
+                      width={718}
+                      height={691}
+                      loading="lazy"
+                      className="h-full w-full rounded-xl object-cover"
+                    />
+                  )}
+                </div>
               </div>
             )}
           </ScrollReveal>
         </div>
       </div>
 
-      {hasIndividualCertificates && (
-        <Lightbox
-          items={siteConfig.certificadosIndividuais}
-          currentIndex={selectedIndex}
-          onClose={() => setSelectedIndex(null)}
-          onNavigate={setSelectedIndex}
-          openerRef={openerRef}
-        />
+      {hasIndividualCertificates && selectedIndex !== null && (
+        <Suspense fallback={null}>
+          <Lightbox
+            items={siteConfig.certificadosIndividuais}
+            currentIndex={selectedIndex}
+            onClose={() => setSelectedIndex(null)}
+            onNavigate={setSelectedIndex}
+            openerRef={openerRef}
+          />
+        </Suspense>
       )}
-    </section>
+    </FadeInSection>
   );
 }

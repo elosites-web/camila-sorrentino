@@ -48,6 +48,39 @@ export function createFadeSlideUpVariants({
   };
 }
 
+export interface SectionFadeOptions {
+  reducedMotion: boolean;
+  duration?: number;
+}
+
+export function createSectionFadeVariants({
+  reducedMotion,
+  duration = 0.55,
+}: SectionFadeOptions): Variants {
+  if (reducedMotion) {
+    return {
+      hidden: { opacity: 1 },
+      visible: {
+        opacity: 1,
+        transition: {
+          duration: 0,
+        },
+      },
+    };
+  }
+
+  return {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        duration,
+        ease: EDITORIAL_EASE,
+      },
+    },
+  };
+}
+
 export function getStaggerDelay(
   index: number,
   step = 0.07,

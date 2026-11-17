@@ -1,11 +1,13 @@
 import { ArrowUpRight, ChevronDown } from 'lucide-react';
-import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
+import { AnimatePresence, m, useReducedMotion } from 'motion/react';
 import { useState } from 'react';
 import { siteConfig } from '../config/site';
 import { toggleFaqId } from '../utils/faq';
 import { buildWhatsAppUrl } from '../utils/formatting';
 import { EDITORIAL_EASE, getStaggerDelay } from '../utils/motion';
+import { FadeInSection } from './FadeInSection';
 import { ScrollReveal } from './ScrollReveal';
+import { WhatsAppIcon } from './SocialIcons';
 
 export function FaqSection() {
   const [openId, setOpenId] = useState<string | null>(
@@ -19,7 +21,7 @@ export function FaqSection() {
   };
 
   return (
-    <section
+    <FadeInSection
       id="duvidas"
       className="bg-[#F4EDE6] py-20 sm:py-24"
     >
@@ -44,6 +46,7 @@ export function FaqSection() {
                 rel="noopener noreferrer"
                 className="inline-flex min-h-[44px] items-center justify-center gap-2 rounded-lg border border-[#8E5258]/35 bg-white px-5 py-2.5 text-sm font-medium text-[#754046] transition-colors duration-200 hover:border-[#8E5258] hover:bg-[#8E5258] hover:text-white"
               >
+                <WhatsAppIcon className="h-4 w-4 shrink-0" />
                 <span>Tirar dúvidas pelo WhatsApp</span>
                 <ArrowUpRight className="h-4 w-4 shrink-0" aria-hidden="true" />
               </a>
@@ -106,7 +109,7 @@ export function FaqSection() {
 
                     <AnimatePresence initial={false}>
                       {isOpen && (
-                        <motion.div
+                        <m.div
                           id={panelId}
                           role="region"
                           aria-labelledby={triggerId}
@@ -133,7 +136,7 @@ export function FaqSection() {
                               {item.resposta}
                             </p>
                           </div>
-                        </motion.div>
+                        </m.div>
                       )}
                     </AnimatePresence>
                   </article>
@@ -143,6 +146,6 @@ export function FaqSection() {
           </div>
         </div>
       </div>
-    </section>
+    </FadeInSection>
   );
 }

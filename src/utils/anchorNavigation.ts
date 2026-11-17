@@ -4,12 +4,16 @@ export const NAV_SECTION_IDS = [
   'sobre',
   'formacao',
   'duvidas',
+  'localizacao',
   'contato',
 ] as const;
 
 export type NavSectionId = (typeof NAV_SECTION_IDS)[number];
 
 export const HERO_ANCHOR_ID = 'inicio';
+
+export const MOBILE_BREAKPOINT_PX = 768;
+export const MOBILE_SOBRE_ANCHOR_OFFSET_PX = 48;
 
 export interface SectionPosition {
   id: NavSectionId;
@@ -23,6 +27,8 @@ export interface AnchorScrollCalculationInput {
   headerHeight: number;
   documentScrollHeight: number;
   viewportHeight: number;
+  /** Additional clearance below header (e.g. mobile #sobre divider visibility). */
+  extraTopOffset?: number;
 }
 
 export interface ActiveSectionMetrics {
@@ -32,6 +38,24 @@ export interface ActiveSectionMetrics {
   scrollHeight: number;
   /** Small pixel tolerance below header bottom so exact alignment counts as active. */
   activationTolerance?: number;
+  /** Extra mobile offset for #sobre so menu selection stays active when scrolled below divider. */
+  sobreActivationOffset?: number;
+}
+
+export function getSectionAnchorExtraOffset(
+  anchorId: string | null | undefined,
+  viewportWidth: number,
+): number {
+  if (
+    anchorId === 'sobre' &&
+    Number.isFinite(viewportWidth) &&
+    viewportWidth > 0 &&
+    viewportWidth < MOBILE_BREAKPOINT_PX
+  ) {
+    return MOBILE_SOBRE_ANCHOR_OFFSET_PX;
+  }
+
+  return 0;
 }
 
 export function normalizeAnchorId(hashOrHref: string | null | undefined): string | null {
@@ -60,8 +84,8 @@ export function isNavSectionId(id: string | null | undefined): id is NavSectionI
 
 /**
  * Computes the exact window.scrollY needed so a section's top edge aligns
- * flush with the lower edge of the fixed/sticky header, clamped to valid
- * document bounds.
+ * flush with the lower edge of the fixed/sticky header (plus optional extraTopOffset),
+ * clamped to valid document bounds.
  */
 export function calculateAnchorScrollTop({
   sectionTopInViewport,
@@ -69,10 +93,14 @@ export function calculateAnchorScrollTop({
   headerHeight,
   documentScrollHeight,
   viewportHeight,
+  extraTopOffset = 0,
 }: AnchorScrollCalculationInput): number {
   const safeHeaderHeight = Math.max(0, headerHeight);
+  const safeExtraOffset = Math.max(0, extraTopOffset);
   const sectionTopInDocument = sectionTopInViewport + currentScrollY;
-  const rawTargetTop = Math.round(sectionTopInDocument - safeHeaderHeight);
+  const rawTargetTop = Math.round(
+    sectionTopInDocument - safeHeaderHeight - safeExtraOffset,
+  );
   const maxScrollY = Math.max(0, Math.round(documentScrollHeight - viewportHeight));
 
   return Math.min(Math.max(0, rawTargetTop), maxScrollY);
@@ -86,7 +114,7 @@ export function calculateAnchorScrollTop({
  * - While the user is above the first navigation section (e.g. viewing Hero),
  *   returns null so no menu section is prematurely selected.
  * - Otherwise picks the last navigation section in document order whose top
- *   edge has reached or passed (headerHeight + activationTolerance).
+ *   edge has reached or passed (headerHeight + activationTolerance + sectionOffset).
  * - When scrolled to the very bottom of the page on tall viewports where the
  *   final section (#contato) cannot scroll all the way up to headerHeight,
  *   returns the final visible navigation section so "Contato" still activates.
@@ -99,6 +127,7 @@ export function resolveActiveSectionId(
     viewportHeight,
     scrollHeight,
     activationTolerance = 16,
+    sobreActivationOffset = 0,
   }: ActiveSectionMetrics,
 ): NavSectionId | null {
   if (sections.length === 0) {
@@ -107,10 +136,12 @@ export function resolveActiveSectionId(
 
   const safeHeaderHeight = Math.max(0, headerHeight);
   const activationLine = safeHeaderHeight + Math.max(0, activationTolerance);
+  const safeSobreOffset = Math.max(0, sobreActivationOffset);
 
   let activeId: NavSectionId | null = null;
   for (const section of sections) {
-    if (section.top <= activationLine) {
+    const sectionOffset = section.id === 'sobre' ? safeSobreOffset : 0;
+    if (section.top <= activationLine + sectionOffset) {
       activeId = section.id;
     }
   }

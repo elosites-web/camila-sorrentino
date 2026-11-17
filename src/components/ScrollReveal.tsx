@@ -1,4 +1,4 @@
-import { motion, useReducedMotion } from 'motion/react';
+import { m, useReducedMotion } from 'motion/react';
 import type { ReactNode } from 'react';
 import {
   DEFAULT_SCROLL_VIEWPORT,
@@ -23,41 +23,21 @@ export function ScrollReveal({
   immediate = false,
 }: ScrollRevealProps) {
   const prefersReducedMotion = Boolean(useReducedMotion());
+
+  // Render above-the-fold immediate content visibly at t=0 so FCP/LCP paint without JS opacity delay.
+  if (immediate || prefersReducedMotion) {
+    return <div className={className}>{children}</div>;
+  }
+
   const variants = createFadeSlideUpVariants({
-    reducedMotion: prefersReducedMotion,
+    reducedMotion: false,
     distance,
     duration,
     delay,
   });
 
-  if (prefersReducedMotion) {
-    return (
-      <motion.div
-        initial={false}
-        animate="visible"
-        variants={variants}
-        className={className}
-      >
-        {children}
-      </motion.div>
-    );
-  }
-
-  if (immediate) {
-    return (
-      <motion.div
-        initial="hidden"
-        animate="visible"
-        variants={variants}
-        className={className}
-      >
-        {children}
-      </motion.div>
-    );
-  }
-
   return (
-    <motion.div
+    <m.div
       initial="hidden"
       whileInView="visible"
       viewport={DEFAULT_SCROLL_VIEWPORT}
@@ -65,6 +45,6 @@ export function ScrollReveal({
       className={className}
     >
       {children}
-    </motion.div>
+    </m.div>
   );
 }

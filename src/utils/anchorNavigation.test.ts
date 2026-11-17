@@ -1,8 +1,10 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import {
+  MOBILE_SOBRE_ANCHOR_OFFSET_PX,
   buildUrlForSection,
   calculateAnchorScrollTop,
+  getSectionAnchorExtraOffset,
   isNavSectionId,
   normalizeAnchorId,
   resolveActiveSectionId,
@@ -24,9 +26,23 @@ test('isNavSectionId matches only top-level navigation section IDs', () => {
   assert.equal(isNavSectionId('sobre'), true);
   assert.equal(isNavSectionId('formacao'), true);
   assert.equal(isNavSectionId('duvidas'), true);
+  assert.equal(isNavSectionId('localizacao'), true);
   assert.equal(isNavSectionId('contato'), true);
   assert.equal(isNavSectionId('inicio'), false);
   assert.equal(isNavSectionId(null), false);
+});
+
+test('getSectionAnchorExtraOffset applies spacing exclusively to #sobre on mobile viewports (<768px)', () => {
+  assert.equal(getSectionAnchorExtraOffset('sobre', 360), MOBILE_SOBRE_ANCHOR_OFFSET_PX);
+  assert.equal(getSectionAnchorExtraOffset('sobre', 390), MOBILE_SOBRE_ANCHOR_OFFSET_PX);
+  assert.equal(getSectionAnchorExtraOffset('sobre', 767), MOBILE_SOBRE_ANCHOR_OFFSET_PX);
+  assert.equal(getSectionAnchorExtraOffset('sobre', 768), 0);
+  assert.equal(getSectionAnchorExtraOffset('sobre', 1440), 0);
+
+  for (const id of ['servicos', 'trabalhos', 'formacao', 'duvidas', 'localizacao', 'contato', 'inicio']) {
+    assert.equal(getSectionAnchorExtraOffset(id, 390), 0);
+    assert.equal(getSectionAnchorExtraOffset(id, 1440), 0);
+  }
 });
 
 test('calculateAnchorScrollTop aligns section top to live header bottom and clamps within document bounds', () => {
@@ -40,6 +56,19 @@ test('calculateAnchorScrollTop aligns section top to live header bottom and clam
       viewportHeight: 844,
     }),
     700,
+  );
+
+  // Mobile #sobre adds extraTopOffset below the 65px header so SectionDivider stays visible
+  assert.equal(
+    calculateAnchorScrollTop({
+      sectionTopInViewport: 2581,
+      currentScrollY: 0,
+      headerHeight: 65,
+      documentScrollHeight: 6000,
+      viewportHeight: 844,
+      extraTopOffset: MOBILE_SOBRE_ANCHOR_OFFSET_PX,
+    }),
+    2581 - 65 - MOBILE_SOBRE_ANCHOR_OFFSET_PX,
   );
 
   // Desktop header height = 81px, scrolled from y=1200 to #sobre currently at top=1381 (doc top = 2581)
@@ -119,6 +148,27 @@ test('resolveActiveSectionId selects the exact section whose top reached the hea
     'sobre',
   );
 
+  // Mobile #sobre anchored below header (top === 65 + MOBILE_SOBRE_ANCHOR_OFFSET_PX) stays active
+  const mobileSobreTop = 65 + MOBILE_SOBRE_ANCHOR_OFFSET_PX;
+  const sectionsAtMobileSobre: SectionPosition[] = [
+    { id: 'servicos', top: -2200 },
+    { id: 'trabalhos', top: -1100 },
+    { id: 'sobre', top: mobileSobreTop },
+    { id: 'formacao', top: 960 },
+    { id: 'contato', top: 2400 },
+  ];
+
+  assert.equal(
+    resolveActiveSectionId(sectionsAtMobileSobre, {
+      headerHeight: 65,
+      scrollY: 2500,
+      viewportHeight: 844,
+      scrollHeight: 7500,
+      sobreActivationOffset: MOBILE_SOBRE_ANCHOR_OFFSET_PX,
+    }),
+    'sobre',
+  );
+
   // Scrolling into #duvidas (between #formacao and #contato) activates 'duvidas'.
   const sectionsAtDuvidas: SectionPosition[] = [
     { id: 'servicos', top: -3200 },
@@ -138,15 +188,36 @@ test('resolveActiveSectionId selects the exact section whose top reached the hea
     }),
     'duvidas',
   );
+  // Scrolling into #localizacao (between #duvidas and #contato) activates 'localizacao'.
+  const sectionsAtLocalizacao: SectionPosition[] = [
+    { id: 'servicos', top: -3900 },
+    { id: 'trabalhos', top: -3000 },
+    { id: 'sobre', top: -2100 },
+    { id: 'formacao', top: -1320 },
+    { id: 'duvidas', top: -620 },
+    { id: 'localizacao', top: 81 },
+    { id: 'contato', top: 840 },
+  ];
+
+  assert.equal(
+    resolveActiveSectionId(sectionsAtLocalizacao, {
+      headerHeight: 81,
+      scrollY: 4600,
+      viewportHeight: 900,
+      scrollHeight: 6500,
+    }),
+    'localizacao',
+  );
 });
 
 test('resolveActiveSectionId activates #contato when reaching page bottom on tall desktop viewports', () => {
   const sectionsAtBottom: SectionPosition[] = [
-    { id: 'servicos', top: -4300 },
-    { id: 'trabalhos', top: -3400 },
-    { id: 'sobre', top: -2500 },
-    { id: 'formacao', top: -1700 },
-    { id: 'duvidas', top: -900 },
+    { id: 'servicos', top: -4800 },
+    { id: 'trabalhos', top: -3900 },
+    { id: 'sobre', top: -3000 },
+    { id: 'formacao', top: -2200 },
+    { id: 'duvidas', top: -1400 },
+    { id: 'localizacao', top: -600 },
     // Short footer stops scroll before #contato.top reaches headerHeight=81
     { id: 'contato', top: 210 },
   ];
@@ -154,9 +225,9 @@ test('resolveActiveSectionId activates #contato when reaching page bottom on tal
   assert.equal(
     resolveActiveSectionId(sectionsAtBottom, {
       headerHeight: 81,
-      scrollY: 4998,
+      scrollY: 5498,
       viewportHeight: 900,
-      scrollHeight: 5900,
+      scrollHeight: 6400,
     }),
     'contato',
   );

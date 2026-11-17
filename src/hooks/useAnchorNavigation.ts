@@ -4,6 +4,7 @@ import {
   buildUrlForSection,
   calculateAnchorScrollTop,
   getMeasuredHeaderHeight,
+  getSectionAnchorExtraOffset,
   isDocumentScrollLocked,
   isNavSectionId,
   normalizeAnchorId,
@@ -93,6 +94,7 @@ export function useAnchorNavigation({
         scrollY: window.scrollY,
         viewportHeight: window.innerHeight,
         scrollHeight: document.documentElement.scrollHeight,
+        sobreActivationOffset: getSectionAnchorExtraOffset('sobre', window.innerWidth),
       });
 
       setActiveSectionId((prev) => (prev === nextActive ? prev : nextActive));
@@ -139,6 +141,7 @@ export function useAnchorNavigation({
         headerHeight: currentHeaderHeight,
         documentScrollHeight: document.documentElement.scrollHeight,
         viewportHeight: window.innerHeight,
+        extraTopOffset: getSectionAnchorExtraOffset(anchorId, window.innerWidth),
       });
 
       const nextNavId = isNavSectionId(anchorId) ? anchorId : null;
