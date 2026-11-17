@@ -2,13 +2,48 @@ import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import fs from 'fs';
 import path from 'path';
-import {defineConfig} from 'vite';
+import {defineConfig, loadEnv} from 'vite';
 
-export default defineConfig(() => {
+const OG_IMAGE_PATH = '/images/og-camila-sorrentino-logo-oficial.png';
+
+function resolveOgImageUrl(rawSiteUrl?: string): string {
+  const trimmed = rawSiteUrl?.trim();
+  if (!trimmed) {
+    return OG_IMAGE_PATH;
+  }
+  try {
+    const parsed = new URL(trimmed);
+    if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') {
+      return OG_IMAGE_PATH;
+    }
+    return `${parsed.origin}${OG_IMAGE_PATH}`;
+  } catch {
+    return OG_IMAGE_PATH;
+  }
+}
+
+export default defineConfig(({mode}) => {
+  const env = loadEnv(mode, process.cwd(), 'VITE_');
+  const resolvedOgImageUrl = resolveOgImageUrl(
+    env.VITE_SITE_URL || process.env.VITE_SITE_URL,
+  );
+
   return {
     plugins: [
       react(),
       tailwindcss(),
+      {
+        name: 'resolve-og-image-url',
+        transformIndexHtml(html: string): string {
+          if (resolvedOgImageUrl === OG_IMAGE_PATH) {
+            return html;
+          }
+          return html.replaceAll(
+            `content="${OG_IMAGE_PATH}"`,
+            `content="${resolvedOgImageUrl}"`,
+          );
+        },
+      },
       // Copies src/assets into dist/ so root-relative URLs like
       // "/src/assets/images/..." (e.g. generate_image output) still resolve
       // in production builds. Do not remove.

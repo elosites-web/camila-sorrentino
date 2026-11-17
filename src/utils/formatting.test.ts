@@ -132,3 +132,26 @@ test('official enderecoConfig formats complete address and builds Google Maps an
     `https://www.google.com/maps?q=${encoded}&hl=pt-BR&z=16&output=embed`,
   );
 });
+
+test('normalizeSiteUrl and resolveOgImageUrl keep root-relative path without invented domain and prefix valid origins', async () => {
+  const { OG_IMAGE_PATH, normalizeSiteUrl, resolveOgImageUrl } = await import('./seo');
+
+  assert.equal(OG_IMAGE_PATH, '/images/og-camila-sorrentino-logo-oficial.png');
+  assert.equal(normalizeSiteUrl(undefined), '');
+  assert.equal(normalizeSiteUrl(''), '');
+  assert.equal(normalizeSiteUrl('not-a-url'), '');
+  assert.equal(normalizeSiteUrl('javascript:alert(1)'), '');
+  assert.equal(
+    normalizeSiteUrl('https://camilasorrentino.com.br/subpath/'),
+    'https://camilasorrentino.com.br',
+  );
+
+  assert.equal(
+    resolveOgImageUrl(OG_IMAGE_PATH, ''),
+    '/images/og-camila-sorrentino-logo-oficial.png',
+  );
+  assert.equal(
+    resolveOgImageUrl(OG_IMAGE_PATH, 'https://camilasorrentino.com.br/'),
+    'https://camilasorrentino.com.br/images/og-camila-sorrentino-logo-oficial.png',
+  );
+});
