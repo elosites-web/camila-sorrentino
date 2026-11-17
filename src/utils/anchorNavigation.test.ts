@@ -23,9 +23,9 @@ test('isNavSectionId matches only top-level navigation section IDs', () => {
   assert.equal(isNavSectionId('trabalhos'), true);
   assert.equal(isNavSectionId('sobre'), true);
   assert.equal(isNavSectionId('formacao'), true);
+  assert.equal(isNavSectionId('duvidas'), true);
   assert.equal(isNavSectionId('contato'), true);
   assert.equal(isNavSectionId('inicio'), false);
-  assert.equal(isNavSectionId('duvidas'), false);
   assert.equal(isNavSectionId(null), false);
 });
 
@@ -119,24 +119,24 @@ test('resolveActiveSectionId selects the exact section whose top reached the hea
     'sobre',
   );
 
-  // While scrolling through FAQ (#duvidas) between #formacao and #contato,
-  // #formacao stays active until #contato enters header zone or bottom of page.
-  const sectionsDuringFaq: SectionPosition[] = [
+  // Scrolling into #duvidas (between #formacao and #contato) activates 'duvidas'.
+  const sectionsAtDuvidas: SectionPosition[] = [
     { id: 'servicos', top: -3200 },
     { id: 'trabalhos', top: -2300 },
     { id: 'sobre', top: -1400 },
     { id: 'formacao', top: -620 },
-    { id: 'contato', top: 480 },
+    { id: 'duvidas', top: 81 },
+    { id: 'contato', top: 780 },
   ];
 
   assert.equal(
-    resolveActiveSectionId(sectionsDuringFaq, {
+    resolveActiveSectionId(sectionsAtDuvidas, {
       headerHeight: 81,
       scrollY: 3900,
       viewportHeight: 900,
       scrollHeight: 5800,
     }),
-    'formacao',
+    'duvidas',
   );
 });
 
@@ -146,6 +146,7 @@ test('resolveActiveSectionId activates #contato when reaching page bottom on tal
     { id: 'trabalhos', top: -3400 },
     { id: 'sobre', top: -2500 },
     { id: 'formacao', top: -1700 },
+    { id: 'duvidas', top: -900 },
     // Short footer stops scroll before #contato.top reaches headerHeight=81
     { id: 'contato', top: 210 },
   ];

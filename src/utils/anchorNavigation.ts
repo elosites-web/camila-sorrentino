@@ -3,6 +3,7 @@ export const NAV_SECTION_IDS = [
   'trabalhos',
   'sobre',
   'formacao',
+  'duvidas',
   'contato',
 ] as const;
 

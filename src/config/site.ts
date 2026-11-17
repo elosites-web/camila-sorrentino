@@ -64,6 +64,7 @@ export const siteConfig = {
     { label: 'Trabalhos', href: '#trabalhos' },
     { label: 'Sobre', href: '#sobre' },
     { label: 'Formação', href: '#formacao' },
+    { label: 'Dúvidas', href: '#duvidas' },
     { label: 'Contato', href: '#contato' },
   ],
   servicos: [
